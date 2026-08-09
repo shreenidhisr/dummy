@@ -1,0 +1,5 @@
+{
+  "name": "dummy",
+  "user": "ubuntu",
+  "install": "python3 -m compileall -q ."
+}
