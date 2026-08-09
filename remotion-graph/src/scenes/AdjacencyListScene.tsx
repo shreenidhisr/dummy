@@ -20,9 +20,7 @@ import {
   NODE_ORDER,
   NODES,
 } from "../data/graph";
-
-/** Frames spent explaining each vertex in the list */
-const FRAMES_PER_NODE = 72;
+import { LIST_TIMING } from "../data/scripts";
 
 export const AdjacencyListScene: React.FC = () => {
   const frame = useCurrentFrame();
@@ -31,10 +29,15 @@ export const AdjacencyListScene: React.FC = () => {
   const nodeProgress = NODES.map(() => 1);
   const edgeProgress = EDGES.map(() => 1);
 
-  const activeIndex = Math.min(
-    NODE_ORDER.length - 1,
-    Math.max(0, Math.floor((frame - 40) / FRAMES_PER_NODE)),
-  );
+  // cues[0] = intro; cues[1..] = one node each
+  const nodeCues = LIST_TIMING.cues.slice(1);
+  let activeIndex = 0;
+  for (let i = 0; i < nodeCues.length; i++) {
+    if (frame >= nodeCues[i].from) {
+      activeIndex = i;
+    }
+  }
+  const highlighting = frame >= nodeCues[0].from;
   const activeId = NODE_ORDER[activeIndex];
 
   return (
@@ -45,7 +48,7 @@ export const AdjacencyListScene: React.FC = () => {
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
-          padding: "100px 48px 130px",
+          padding: "100px 48px 140px",
           gap: 24,
         }}
       >
@@ -55,12 +58,14 @@ export const AdjacencyListScene: React.FC = () => {
             edges={EDGES}
             nodeProgress={nodeProgress}
             edgeProgress={edgeProgress}
-            highlightNodeIds={[activeId]}
-            mutedEdgePredicate={(edge) =>
-              edge.from !== activeId && edge.to !== activeId
+            highlightNodeIds={highlighting ? [activeId] : []}
+            mutedEdgePredicate={
+              highlighting
+                ? (edge) => edge.from !== activeId && edge.to !== activeId
+                : undefined
             }
             width={620}
-            height={420}
+            height={400}
             offsetX={220}
             offsetY={70}
             scale={0.95}
@@ -91,11 +96,11 @@ export const AdjacencyListScene: React.FC = () => {
           </div>
           {NODE_ORDER.map((id, i) => {
             const rowIn = spring({
-              frame: frame - (16 + i * 14),
+              frame: frame - (20 + i * 18),
               fps,
               config: { damping: 200 },
             });
-            const isActive = id === activeId && frame >= 40;
+            const isActive = highlighting && id === activeId;
             return (
               <div
                 key={id}
@@ -141,34 +146,7 @@ export const AdjacencyListScene: React.FC = () => {
           })}
         </div>
       </AbsoluteFill>
-      <NarrationBar
-        cues={[
-          {
-            from: 0,
-            text: "Adjacency list: for each node, store only its neighbors.",
-          },
-          {
-            from: 40,
-            text: `Node A → [${ADJACENCY_LIST.A.join(", ")}]. Highlight shows those edges on the graph.`,
-          },
-          {
-            from: 40 + FRAMES_PER_NODE,
-            text: `Node B → [${ADJACENCY_LIST.B.join(", ")}]. Degree 3 — three neighbors stored.`,
-          },
-          {
-            from: 40 + FRAMES_PER_NODE * 2,
-            text: `Node C → [${ADJACENCY_LIST.C.join(", ")}]. Sparse graphs stay compact this way.`,
-          },
-          {
-            from: 40 + FRAMES_PER_NODE * 3,
-            text: `Node D → [${ADJACENCY_LIST.D.join(", ")}]. Overall space is about O(V + E).`,
-          },
-          {
-            from: 40 + FRAMES_PER_NODE * 4,
-            text: `Node E → [${ADJACENCY_LIST.E.join(", ")}]. Lists are the usual default for real graphs.`,
-          },
-        ]}
-      />
+      <NarrationBar cues={LIST_TIMING.cues} />
     </Background>
   );
 };

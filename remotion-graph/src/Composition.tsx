@@ -1,23 +1,16 @@
 import React from "react";
 import { AbsoluteFill, Sequence, Series } from "remotion";
+import { FPS, HEIGHT, WIDTH } from "./constants";
+import { SCENE_FRAMES } from "./data/scripts";
 import { TitleScene } from "./scenes/TitleScene";
 import { GraphBuildScene } from "./scenes/GraphBuildScene";
 import { AdjacencyListScene } from "./scenes/AdjacencyListScene";
 import { AdjacencyMatrixScene } from "./scenes/AdjacencyMatrixScene";
 import { SummaryScene } from "./scenes/SummaryScene";
 
-export const FPS = 30;
-export const WIDTH = 1280;
-export const HEIGHT = 720;
+export { FPS, HEIGHT, WIDTH };
 
-/** Slower pacing for classroom-style explanation (~55s) */
-export const SCENE_FRAMES = {
-  title: 150,
-  build: 360,
-  list: 450,
-  matrix: 420,
-  summary: 210,
-} as const;
+export { SCENE_FRAMES };
 
 export const TOTAL_FRAMES =
   SCENE_FRAMES.title +

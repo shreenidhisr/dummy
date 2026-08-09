@@ -13,23 +13,36 @@ import {
   SceneLabel,
 } from "../components/Visual";
 import { EDGES, NODES } from "../data/graph";
+import { BUILD_TIMING } from "../data/scripts";
 
 export const GraphBuildScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Slow node reveal: one every ~24 frames
+  // Cue 0–1 talk about nodes; cue 2+ talk about edges
+  const nodeCue = BUILD_TIMING.cues[0];
+  const edgeCue = BUILD_TIMING.cues[2];
+
+  const nodeStart = nodeCue.from + 30;
+  const nodeGap = Math.floor(nodeCue.durationInFrames / NODES.length);
+
   const nodeProgress = NODES.map((_, i) =>
     spring({
-      frame: frame - (20 + i * 24),
+      frame: frame - (nodeStart + i * nodeGap),
       fps,
-      config: { damping: 18, stiffness: 80 },
+      config: { damping: 20, stiffness: 60 },
     }),
   );
 
-  // Edges draw after nodes, one every ~28 frames, slower stroke
+  const edgeStart = edgeCue.from + 20;
+  const edgeGap = Math.floor(
+    (BUILD_TIMING.cues[2].durationInFrames +
+      BUILD_TIMING.cues[3].durationInFrames) /
+      EDGES.length,
+  );
+
   const edgeProgress = EDGES.map((_, i) =>
-    interpolate(frame - (160 + i * 28), [0, 26], [0, 1], {
+    interpolate(frame - (edgeStart + i * edgeGap), [0, 40], [0, 1], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
     }),
@@ -43,7 +56,7 @@ export const GraphBuildScene: React.FC = () => {
           justifyContent: "center",
           alignItems: "center",
           paddingTop: 20,
-          paddingBottom: 110,
+          paddingBottom: 120,
         }}
       >
         <MiniGraph
@@ -57,30 +70,7 @@ export const GraphBuildScene: React.FC = () => {
           offsetY={40}
         />
       </AbsoluteFill>
-      <NarrationBar
-        cues={[
-          {
-            from: 0,
-            text: "Start with vertices: each circle is a node (A–E).",
-          },
-          {
-            from: 90,
-            text: "Nodes are the things we connect — cities, users, pages…",
-          },
-          {
-            from: 170,
-            text: "Now draw edges: an edge means two nodes are related.",
-          },
-          {
-            from: 260,
-            text: "This graph is undirected: A–B is the same as B–A.",
-          },
-          {
-            from: 320,
-            text: "Visual form is intuitive — next we store it in memory.",
-          },
-        ]}
-      />
+      <NarrationBar cues={BUILD_TIMING.cues} />
     </Background>
   );
 };

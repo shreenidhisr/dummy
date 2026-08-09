@@ -12,6 +12,7 @@ import {
   NarrationBar,
   fonts,
 } from "../components/Visual";
+import { SUMMARY_TIMING } from "../data/scripts";
 
 const CARDS = [
   {
@@ -33,10 +34,13 @@ export const SummaryScene: React.FC = () => {
   const { fps } = useVideoConfig();
 
   const titleIn = spring({
-    frame: frame - 8,
+    frame: frame - 12,
     fps,
     config: { damping: 200 },
   });
+
+  // Reveal cards across the first two narration cues
+  const cardGap = Math.floor(SUMMARY_TIMING.cues[0].durationInFrames / 2);
 
   return (
     <Background>
@@ -44,7 +48,7 @@ export const SummaryScene: React.FC = () => {
         style={{
           justifyContent: "center",
           alignItems: "center",
-          padding: "64px 64px 140px",
+          padding: "64px 64px 150px",
         }}
       >
         <div
@@ -83,9 +87,9 @@ export const SummaryScene: React.FC = () => {
         >
           {CARDS.map((card, i) => {
             const enter = spring({
-              frame: frame - (30 + i * 22),
+              frame: frame - (40 + i * cardGap),
               fps,
-              config: { damping: 18, stiffness: 90 },
+              config: { damping: 20, stiffness: 70 },
             });
             return (
               <div
@@ -134,22 +138,7 @@ export const SummaryScene: React.FC = () => {
           })}
         </div>
       </AbsoluteFill>
-      <NarrationBar
-        cues={[
-          {
-            from: 0,
-            text: "Remember: one graph, three ways to show the same edges.",
-          },
-          {
-            from: 55,
-            text: "Picture for intuition · list for sparse data · matrix for fast checks.",
-          },
-          {
-            from: 130,
-            text: "Choose the representation that matches your graph and operations.",
-          },
-        ]}
-      />
+      <NarrationBar cues={SUMMARY_TIMING.cues} />
     </Background>
   );
 };
