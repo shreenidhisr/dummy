@@ -10,12 +10,13 @@ export const FPS = 30;
 export const WIDTH = 1280;
 export const HEIGHT = 720;
 
+/** Slower pacing for classroom-style explanation (~55s) */
 export const SCENE_FRAMES = {
-  title: 75,
-  build: 120,
-  list: 140,
-  matrix: 150,
-  summary: 90,
+  title: 150,
+  build: 360,
+  list: 450,
+  matrix: 420,
+  summary: 210,
 } as const;
 
 export const TOTAL_FRAMES =

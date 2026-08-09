@@ -9,6 +9,7 @@ import {
 import {
   Background,
   MiniGraph,
+  NarrationBar,
   SceneLabel,
 } from "../components/Visual";
 import { EDGES, NODES } from "../data/graph";
@@ -17,26 +18,22 @@ export const GraphBuildScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
+  // Slow node reveal: one every ~24 frames
   const nodeProgress = NODES.map((_, i) =>
     spring({
-      frame: frame - i * 8,
+      frame: frame - (20 + i * 24),
       fps,
-      config: { damping: 14, stiffness: 120 },
+      config: { damping: 18, stiffness: 80 },
     }),
   );
 
+  // Edges draw after nodes, one every ~28 frames, slower stroke
   const edgeProgress = EDGES.map((_, i) =>
-    interpolate(frame - (40 + i * 7), [0, 14], [0, 1], {
+    interpolate(frame - (160 + i * 28), [0, 26], [0, 1], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
     }),
   );
-
-  const caption = spring({
-    frame: frame - 90,
-    fps,
-    config: { damping: 200 },
-  });
 
   return (
     <Background>
@@ -45,7 +42,8 @@ export const GraphBuildScene: React.FC = () => {
         style={{
           justifyContent: "center",
           alignItems: "center",
-          paddingTop: 40,
+          paddingTop: 20,
+          paddingBottom: 110,
         }}
       >
         <MiniGraph
@@ -54,26 +52,35 @@ export const GraphBuildScene: React.FC = () => {
           nodeProgress={nodeProgress}
           edgeProgress={edgeProgress}
           width={1100}
-          height={520}
+          height={480}
           offsetX={100}
           offsetY={40}
         />
       </AbsoluteFill>
-      <div
-        style={{
-          position: "absolute",
-          bottom: 56,
-          left: 0,
-          right: 0,
-          textAlign: "center",
-          fontSize: 24,
-          opacity: caption,
-          transform: `translateY(${interpolate(caption, [0, 1], [20, 0])}px)`,
-          color: "rgba(232, 238, 247, 0.85)",
-        }}
-      >
-        Vertices (nodes) connected by edges — undirected, unweighted
-      </div>
+      <NarrationBar
+        cues={[
+          {
+            from: 0,
+            text: "Start with vertices: each circle is a node (A–E).",
+          },
+          {
+            from: 90,
+            text: "Nodes are the things we connect — cities, users, pages…",
+          },
+          {
+            from: 170,
+            text: "Now draw edges: an edge means two nodes are related.",
+          },
+          {
+            from: 260,
+            text: "This graph is undirected: A–B is the same as B–A.",
+          },
+          {
+            from: 320,
+            text: "Visual form is intuitive — next we store it in memory.",
+          },
+        ]}
+      />
     </Background>
   );
 };
