@@ -7,6 +7,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { Background, COLORS, NarrationBar, fonts } from "../components/Visual";
+import { TITLE_TIMING } from "../data/scripts";
 
 export const TitleScene: React.FC = () => {
   const frame = useCurrentFrame();
@@ -18,11 +19,11 @@ export const TitleScene: React.FC = () => {
     config: { damping: 200 },
   });
   const subIn = spring({
-    frame: frame - 18,
+    frame: frame - 24,
     fps,
     config: { damping: 200 },
   });
-  const pulse = interpolate(Math.sin(frame / 28), [-1, 1], [0.88, 1]);
+  const pulse = interpolate(Math.sin(frame / 36), [-1, 1], [0.88, 1]);
 
   return (
     <Background>
@@ -30,7 +31,7 @@ export const TitleScene: React.FC = () => {
         style={{
           justifyContent: "center",
           alignItems: "center",
-          paddingBottom: 100,
+          paddingBottom: 110,
         }}
       >
         <div
@@ -86,22 +87,7 @@ export const TitleScene: React.FC = () => {
           </div>
         </div>
       </AbsoluteFill>
-      <NarrationBar
-        cues={[
-          {
-            from: 0,
-            text: "A graph stores relationships — vertices linked by edges.",
-          },
-          {
-            from: 55,
-            text: "We will see the same graph as a picture, a list, and a matrix.",
-          },
-          {
-            from: 110,
-            text: "Watch slowly: each representation stores the same connections.",
-          },
-        ]}
-      />
+      <NarrationBar cues={TITLE_TIMING.cues} />
     </Background>
   );
 };

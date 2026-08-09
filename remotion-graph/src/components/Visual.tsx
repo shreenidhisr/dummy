@@ -125,9 +125,9 @@ export type NarrationCue = {
   text: string;
 };
 
-/** Bottom narration strip for explanatory pacing */
+/** Bottom narration strip — cues are pre-timed for human reading pace */
 export const NarrationBar: React.FC<{
-  cues: NarrationCue[];
+  cues: Array<{ from: number; text: string; durationInFrames?: number }>;
   label?: string;
 }> = ({ cues, label = "Narration" }) => {
   const frame = useCurrentFrame();
@@ -148,6 +148,9 @@ export const NarrationBar: React.FC<{
     config: { damping: 200 },
   });
 
+  const duration = cue.durationInFrames ?? 180;
+  const readProgress = Math.min(1, Math.max(0, local / Math.max(1, duration)));
+
   return (
     <div
       style={{
@@ -155,59 +158,84 @@ export const NarrationBar: React.FC<{
         left: 48,
         right: 48,
         bottom: 28,
-        minHeight: 88,
-        background: "rgba(7, 11, 20, 0.88)",
+        minHeight: 96,
+        background: "rgba(7, 11, 20, 0.9)",
         border: `1px solid ${COLORS.border}`,
         borderRadius: 14,
-        padding: "16px 28px",
+        padding: "16px 28px 14px",
         display: "flex",
-        alignItems: "center",
-        gap: 20,
+        flexDirection: "column",
+        gap: 12,
         boxShadow: "0 12px 40px rgba(0,0,0,0.35)",
       }}
     >
       <div
         style={{
-          fontFamily: fonts.mono,
-          fontSize: 13,
-          letterSpacing: 2,
-          textTransform: "uppercase",
-          color: COLORS.accent,
-          whiteSpace: "nowrap",
-          opacity: 0.95,
+          display: "flex",
+          alignItems: "center",
+          gap: 20,
         }}
       >
-        {label}
+        <div
+          style={{
+            fontFamily: fonts.mono,
+            fontSize: 13,
+            letterSpacing: 2,
+            textTransform: "uppercase",
+            color: COLORS.accent,
+            whiteSpace: "nowrap",
+            opacity: 0.95,
+          }}
+        >
+          {label}
+        </div>
+        <div
+          style={{
+            width: 1,
+            alignSelf: "stretch",
+            background: COLORS.border,
+          }}
+        />
+        <div
+          key={`${activeIndex}-${cue.text}`}
+          style={{
+            flex: 1,
+            fontSize: 24,
+            lineHeight: 1.4,
+            color: COLORS.text,
+            opacity: enter,
+            transform: `translateY(${interpolate(enter, [0, 1], [10, 0])}px)`,
+          }}
+        >
+          {cue.text}
+        </div>
+        <div
+          style={{
+            fontFamily: fonts.mono,
+            fontSize: 14,
+            color: COLORS.muted,
+            whiteSpace: "nowrap",
+          }}
+        >
+          {activeIndex + 1}/{cues.length}
+        </div>
       </div>
       <div
         style={{
-          width: 1,
-          alignSelf: "stretch",
-          background: COLORS.border,
-        }}
-      />
-      <div
-        key={`${activeIndex}-${cue.text}`}
-        style={{
-          flex: 1,
-          fontSize: 24,
-          lineHeight: 1.35,
-          color: COLORS.text,
-          opacity: enter,
-          transform: `translateY(${interpolate(enter, [0, 1], [10, 0])}px)`,
+          height: 3,
+          borderRadius: 99,
+          background: "rgba(148, 163, 184, 0.18)",
+          overflow: "hidden",
         }}
       >
-        {cue.text}
-      </div>
-      <div
-        style={{
-          fontFamily: fonts.mono,
-          fontSize: 14,
-          color: COLORS.muted,
-          whiteSpace: "nowrap",
-        }}
-      >
-        {activeIndex + 1}/{cues.length}
+        <div
+          style={{
+            width: `${readProgress * 100}%`,
+            height: "100%",
+            background: COLORS.accent,
+            borderRadius: 99,
+          }}
+        />
       </div>
     </div>
   );
