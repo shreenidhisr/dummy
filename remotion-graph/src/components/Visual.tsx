@@ -88,8 +88,8 @@ export const SceneLabel: React.FC<{
     <div
       style={{
         position: "absolute",
-        top: 48,
-        left: 64,
+        top: 36,
+        left: 56,
         transform: `translateY(${y}px)`,
         opacity,
       }}
@@ -97,24 +97,117 @@ export const SceneLabel: React.FC<{
       <div
         style={{
           fontFamily: fonts.mono,
-          fontSize: 18,
+          fontSize: 16,
           letterSpacing: 3,
           textTransform: "uppercase",
           color: COLORS.accent,
-          marginBottom: 10,
+          marginBottom: 8,
         }}
       >
         {eyebrow}
       </div>
       <div
         style={{
-          fontSize: 44,
+          fontSize: 38,
           fontWeight: 700,
           letterSpacing: -0.5,
           lineHeight: 1.1,
         }}
       >
         {title}
+      </div>
+    </div>
+  );
+};
+
+export type NarrationCue = {
+  from: number;
+  text: string;
+};
+
+/** Bottom narration strip for explanatory pacing */
+export const NarrationBar: React.FC<{
+  cues: NarrationCue[];
+  label?: string;
+}> = ({ cues, label = "Narration" }) => {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  let activeIndex = 0;
+  for (let i = 0; i < cues.length; i++) {
+    if (frame >= cues[i].from) {
+      activeIndex = i;
+    }
+  }
+
+  const cue = cues[activeIndex];
+  const local = frame - cue.from;
+  const enter = spring({
+    frame: local,
+    fps,
+    config: { damping: 200 },
+  });
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: 48,
+        right: 48,
+        bottom: 28,
+        minHeight: 88,
+        background: "rgba(7, 11, 20, 0.88)",
+        border: `1px solid ${COLORS.border}`,
+        borderRadius: 14,
+        padding: "16px 28px",
+        display: "flex",
+        alignItems: "center",
+        gap: 20,
+        boxShadow: "0 12px 40px rgba(0,0,0,0.35)",
+      }}
+    >
+      <div
+        style={{
+          fontFamily: fonts.mono,
+          fontSize: 13,
+          letterSpacing: 2,
+          textTransform: "uppercase",
+          color: COLORS.accent,
+          whiteSpace: "nowrap",
+          opacity: 0.95,
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          width: 1,
+          alignSelf: "stretch",
+          background: COLORS.border,
+        }}
+      />
+      <div
+        key={`${activeIndex}-${cue.text}`}
+        style={{
+          flex: 1,
+          fontSize: 24,
+          lineHeight: 1.35,
+          color: COLORS.text,
+          opacity: enter,
+          transform: `translateY(${interpolate(enter, [0, 1], [10, 0])}px)`,
+        }}
+      >
+        {cue.text}
+      </div>
+      <div
+        style={{
+          fontFamily: fonts.mono,
+          fontSize: 14,
+          color: COLORS.muted,
+          whiteSpace: "nowrap",
+        }}
+      >
+        {activeIndex + 1}/{cues.length}
       </div>
     </div>
   );

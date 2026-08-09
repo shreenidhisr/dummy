@@ -10,10 +10,13 @@ import {
   Background,
   COLORS,
   MiniGraph,
+  NarrationBar,
   SceneLabel,
   fonts,
 } from "../components/Visual";
 import { ADJACENCY_LIST, EDGES, NODE_ORDER, NODES } from "../data/graph";
+
+const FRAMES_PER_ROW = 64;
 
 export const AdjacencyMatrixScene: React.FC = () => {
   const frame = useCurrentFrame();
@@ -22,26 +25,21 @@ export const AdjacencyMatrixScene: React.FC = () => {
   const nodeProgress = NODES.map(() => 1);
   const edgeProgress = EDGES.map(() => 1);
 
-  const reveal = interpolate(frame, [0, 20], [0, 1], {
+  const reveal = interpolate(frame, [0, 36], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
+  const scanStarted = frame >= 70;
   const scanRow = Math.min(
     NODE_ORDER.length - 1,
-    Math.max(0, Math.floor((frame - 24) / 18)),
+    Math.max(0, Math.floor((frame - 70) / FRAMES_PER_ROW)),
   );
 
   const isConnected = (a: string, b: string) =>
     a === b ? false : ADJACENCY_LIST[a].includes(b);
 
-  const highlightPair =
-    frame > 24
-      ? {
-          row: NODE_ORDER[scanRow],
-          neighbors: ADJACENCY_LIST[NODE_ORDER[scanRow]],
-        }
-      : null;
+  const activeId = NODE_ORDER[scanRow];
 
   return (
     <Background>
@@ -51,7 +49,7 @@ export const AdjacencyMatrixScene: React.FC = () => {
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
-          padding: "120px 48px 48px",
+          padding: "100px 48px 130px",
           gap: 20,
         }}
       >
@@ -61,12 +59,17 @@ export const AdjacencyMatrixScene: React.FC = () => {
             edges={EDGES}
             nodeProgress={nodeProgress}
             edgeProgress={edgeProgress}
-            highlightNodeIds={highlightPair ? [highlightPair.row] : []}
-            width={560}
-            height={440}
-            offsetX={240}
-            offsetY={70}
-            scale={0.9}
+            highlightNodeIds={scanStarted ? [activeId] : []}
+            mutedEdgePredicate={
+              scanStarted
+                ? (edge) => edge.from !== activeId && edge.to !== activeId
+                : undefined
+            }
+            width={520}
+            height={400}
+            offsetX={250}
+            offsetY={80}
+            scale={0.88}
           />
         </div>
 
@@ -81,10 +84,10 @@ export const AdjacencyMatrixScene: React.FC = () => {
             style={{
               fontFamily: fonts.mono,
               color: COLORS.muted,
-              fontSize: 16,
+              fontSize: 15,
               letterSpacing: 2,
               textTransform: "uppercase",
-              marginBottom: 16,
+              marginBottom: 14,
             }}
           >
             matrix[i][j] = 1 if edge exists
@@ -92,8 +95,8 @@ export const AdjacencyMatrixScene: React.FC = () => {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: `48px repeat(${NODE_ORDER.length}, 64px)`,
-              gap: 8,
+              gridTemplateColumns: `44px repeat(${NODE_ORDER.length}, 58px)`,
+              gap: 7,
               alignItems: "center",
               justifyContent: "start",
               fontFamily: fonts.mono,
@@ -106,7 +109,7 @@ export const AdjacencyMatrixScene: React.FC = () => {
                 style={{
                   textAlign: "center",
                   color: COLORS.muted,
-                  fontSize: 18,
+                  fontSize: 17,
                 }}
               >
                 {col}
@@ -114,7 +117,7 @@ export const AdjacencyMatrixScene: React.FC = () => {
             ))}
             {NODE_ORDER.map((row, ri) => {
               const rowSpring = spring({
-                frame: frame - (10 + ri * 6),
+                frame: frame - (18 + ri * 10),
                 fps,
                 config: { damping: 200 },
               });
@@ -124,7 +127,7 @@ export const AdjacencyMatrixScene: React.FC = () => {
                     style={{
                       textAlign: "center",
                       color: COLORS.muted,
-                      fontSize: 18,
+                      fontSize: 17,
                       opacity: rowSpring,
                     }}
                   >
@@ -132,29 +135,29 @@ export const AdjacencyMatrixScene: React.FC = () => {
                   </div>
                   {NODE_ORDER.map((col, ci) => {
                     const on = isConnected(row, col);
-                    const cellDelay = 14 + ri * 5 + ci * 3;
+                    const cellDelay = 24 + ri * 8 + ci * 5;
                     const cellIn = spring({
                       frame: frame - cellDelay,
                       fps,
-                      config: { damping: 16, stiffness: 120 },
+                      config: { damping: 18, stiffness: 90 },
                     });
-                    const scanning = ri === scanRow && frame > 24;
+                    const scanning = scanStarted && ri === scanRow;
                     return (
                       <div
                         key={`${row}-${col}`}
                         style={{
-                          width: 64,
-                          height: 54,
-                          borderRadius: 10,
+                          width: 58,
+                          height: 48,
+                          borderRadius: 9,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           background: on ? COLORS.matrixOn : COLORS.matrixOff,
                           color: on ? COLORS.nodeText : COLORS.muted,
                           fontWeight: 700,
-                          fontSize: 20,
+                          fontSize: 18,
                           opacity: cellIn,
-                          transform: `scale(${interpolate(cellIn, [0, 1], [0.6, 1])})`,
+                          transform: `scale(${interpolate(cellIn, [0, 1], [0.65, 1])})`,
                           boxShadow: scanning
                             ? `0 0 0 2px ${COLORS.accent}`
                             : "none",
@@ -168,18 +171,36 @@ export const AdjacencyMatrixScene: React.FC = () => {
               );
             })}
           </div>
-          <div
-            style={{
-              marginTop: 22,
-              fontSize: 20,
-              color: "rgba(232, 238, 247, 0.8)",
-              fontFamily: fonts.display,
-            }}
-          >
-            O(V²) space — fast edge queries, denser graphs
-          </div>
         </div>
       </AbsoluteFill>
+      <NarrationBar
+        cues={[
+          {
+            from: 0,
+            text: "Adjacency matrix: a V×V grid. Cell (i, j) is 1 if an edge exists.",
+          },
+          {
+            from: 70,
+            text: `Row A: 1s mark neighbors [${ADJACENCY_LIST.A.join(", ")}]. Diagonal stays 0 (no self-loops).`,
+          },
+          {
+            from: 70 + FRAMES_PER_ROW,
+            text: `Row B: edges to [${ADJACENCY_LIST.B.join(", ")}]. Read one cell to test an edge in O(1).`,
+          },
+          {
+            from: 70 + FRAMES_PER_ROW * 2,
+            text: `Row C: [${ADJACENCY_LIST.C.join(", ")}]. Fast queries, but we store every pair.`,
+          },
+          {
+            from: 70 + FRAMES_PER_ROW * 3,
+            text: "Cost: O(V²) space — many zeros when the graph is sparse.",
+          },
+          {
+            from: 70 + FRAMES_PER_ROW * 4,
+            text: "Prefer a matrix for dense graphs or frequent “is there an edge?” checks.",
+          },
+        ]}
+      />
     </Background>
   );
 };

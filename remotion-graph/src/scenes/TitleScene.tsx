@@ -6,19 +6,23 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { Background, COLORS, fonts } from "../components/Visual";
+import { Background, COLORS, NarrationBar, fonts } from "../components/Visual";
 
 export const TitleScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const titleIn = spring({ frame, fps, config: { damping: 18, stiffness: 90 } });
-  const subIn = spring({
-    frame: frame - 10,
+  const titleIn = spring({
+    frame,
     fps,
     config: { damping: 200 },
   });
-  const pulse = interpolate(Math.sin(frame / 18), [-1, 1], [0.85, 1]);
+  const subIn = spring({
+    frame: frame - 18,
+    fps,
+    config: { damping: 200 },
+  });
+  const pulse = interpolate(Math.sin(frame / 28), [-1, 1], [0.88, 1]);
 
   return (
     <Background>
@@ -26,23 +30,24 @@ export const TitleScene: React.FC = () => {
         style={{
           justifyContent: "center",
           alignItems: "center",
+          paddingBottom: 100,
         }}
       >
         <div
           style={{
-            width: 180,
-            height: 180,
+            width: 200,
+            height: 200,
             borderRadius: "50%",
             border: `2px solid ${COLORS.node}`,
-            opacity: 0.35 * pulse,
+            opacity: 0.3 * pulse,
             position: "absolute",
-            transform: `scale(${interpolate(titleIn, [0, 1], [0.6, 1.15])})`,
+            transform: `scale(${interpolate(titleIn, [0, 1], [0.7, 1.12])})`,
           }}
         />
         <div
           style={{
             textAlign: "center",
-            transform: `translateY(${interpolate(titleIn, [0, 1], [40, 0])}px) scale(${interpolate(titleIn, [0, 1], [0.92, 1])})`,
+            transform: `translateY(${interpolate(titleIn, [0, 1], [28, 0])}px)`,
             opacity: titleIn,
           }}
         >
@@ -60,7 +65,7 @@ export const TitleScene: React.FC = () => {
           </div>
           <div
             style={{
-              fontSize: 88,
+              fontSize: 78,
               fontWeight: 700,
               letterSpacing: -2,
               lineHeight: 1,
@@ -71,16 +76,32 @@ export const TitleScene: React.FC = () => {
           <div
             style={{
               marginTop: 22,
-              fontSize: 26,
+              fontSize: 24,
               color: COLORS.muted,
               opacity: subIn,
-              transform: `translateY(${interpolate(subIn, [0, 1], [16, 0])}px)`,
+              transform: `translateY(${interpolate(subIn, [0, 1], [14, 0])}px)`,
             }}
           >
             From visual structure to adjacency list & matrix
           </div>
         </div>
       </AbsoluteFill>
+      <NarrationBar
+        cues={[
+          {
+            from: 0,
+            text: "A graph stores relationships — vertices linked by edges.",
+          },
+          {
+            from: 55,
+            text: "We will see the same graph as a picture, a list, and a matrix.",
+          },
+          {
+            from: 110,
+            text: "Watch slowly: each representation stores the same connections.",
+          },
+        ]}
+      />
     </Background>
   );
 };

@@ -6,7 +6,12 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { Background, COLORS, fonts } from "../components/Visual";
+import {
+  Background,
+  COLORS,
+  NarrationBar,
+  fonts,
+} from "../components/Visual";
 
 const CARDS = [
   {
@@ -27,7 +32,11 @@ export const SummaryScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  const titleIn = spring({ frame, fps, config: { damping: 200 } });
+  const titleIn = spring({
+    frame: frame - 8,
+    fps,
+    config: { damping: 200 },
+  });
 
   return (
     <Background>
@@ -35,7 +44,7 @@ export const SummaryScene: React.FC = () => {
         style={{
           justifyContent: "center",
           alignItems: "center",
-          padding: 64,
+          padding: "64px 64px 140px",
         }}
       >
         <div
@@ -43,7 +52,7 @@ export const SummaryScene: React.FC = () => {
             textAlign: "center",
             opacity: titleIn,
             transform: `translateY(${interpolate(titleIn, [0, 1], [20, 0])}px)`,
-            marginBottom: 48,
+            marginBottom: 40,
           }}
         >
           <div
@@ -52,13 +61,13 @@ export const SummaryScene: React.FC = () => {
               letterSpacing: 3,
               textTransform: "uppercase",
               color: COLORS.accent,
-              fontSize: 18,
+              fontSize: 17,
               marginBottom: 12,
             }}
           >
             Recap
           </div>
-          <div style={{ fontSize: 56, fontWeight: 700, letterSpacing: -1 }}>
+          <div style={{ fontSize: 48, fontWeight: 700, letterSpacing: -1 }}>
             Same graph, three views
           </div>
         </div>
@@ -66,7 +75,7 @@ export const SummaryScene: React.FC = () => {
         <div
           style={{
             display: "flex",
-            gap: 24,
+            gap: 22,
             width: "100%",
             maxWidth: 1100,
             justifyContent: "center",
@@ -74,9 +83,9 @@ export const SummaryScene: React.FC = () => {
         >
           {CARDS.map((card, i) => {
             const enter = spring({
-              frame: frame - (12 + i * 8),
+              frame: frame - (30 + i * 22),
               fps,
-              config: { damping: 16, stiffness: 110 },
+              config: { damping: 18, stiffness: 90 },
             });
             return (
               <div
@@ -86,15 +95,15 @@ export const SummaryScene: React.FC = () => {
                   background: COLORS.panel,
                   border: `1px solid ${COLORS.border}`,
                   borderRadius: 16,
-                  padding: "28px 24px",
+                  padding: "26px 22px",
                   opacity: enter,
-                  transform: `translateY(${interpolate(enter, [0, 1], [30, 0])}px)`,
+                  transform: `translateY(${interpolate(enter, [0, 1], [28, 0])}px)`,
                 }}
               >
                 <div
                   style={{
-                    width: 36,
-                    height: 36,
+                    width: 34,
+                    height: 34,
                     borderRadius: "50%",
                     background: i === 2 ? COLORS.accent : COLORS.node,
                     color: COLORS.nodeText,
@@ -102,7 +111,7 @@ export const SummaryScene: React.FC = () => {
                     alignItems: "center",
                     justifyContent: "center",
                     fontWeight: 700,
-                    marginBottom: 18,
+                    marginBottom: 16,
                     fontFamily: fonts.display,
                   }}
                 >
@@ -110,14 +119,14 @@ export const SummaryScene: React.FC = () => {
                 </div>
                 <div
                   style={{
-                    fontSize: 26,
+                    fontSize: 24,
                     fontWeight: 700,
                     marginBottom: 10,
                   }}
                 >
                   {card.title}
                 </div>
-                <div style={{ fontSize: 18, color: COLORS.muted }}>
+                <div style={{ fontSize: 17, color: COLORS.muted }}>
                   {card.body}
                 </div>
               </div>
@@ -125,6 +134,22 @@ export const SummaryScene: React.FC = () => {
           })}
         </div>
       </AbsoluteFill>
+      <NarrationBar
+        cues={[
+          {
+            from: 0,
+            text: "Remember: one graph, three ways to show the same edges.",
+          },
+          {
+            from: 55,
+            text: "Picture for intuition · list for sparse data · matrix for fast checks.",
+          },
+          {
+            from: 130,
+            text: "Choose the representation that matches your graph and operations.",
+          },
+        ]}
+      />
     </Background>
   );
 };
