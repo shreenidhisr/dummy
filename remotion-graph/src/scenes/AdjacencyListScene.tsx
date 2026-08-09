@@ -29,20 +29,23 @@ export const AdjacencyListScene: React.FC = () => {
   const nodeProgress = NODES.map(() => 1);
   const edgeProgress = EDGES.map(() => 1);
 
-  // cues[0] = intro; cues[1..] = one node each
-  const nodeCues = LIST_TIMING.cues.slice(1);
+  // cue 0 = intro, cues 1..5 = nodes A–E, last = wrap
+  const nodeCues = LIST_TIMING.cues.slice(1, 1 + NODE_ORDER.length);
+  const highlighting =
+    frame >= nodeCues[0].from &&
+    frame < LIST_TIMING.cues[LIST_TIMING.cues.length - 1].from;
+
   let activeIndex = 0;
   for (let i = 0; i < nodeCues.length; i++) {
     if (frame >= nodeCues[i].from) {
       activeIndex = i;
     }
   }
-  const highlighting = frame >= nodeCues[0].from;
   const activeId = NODE_ORDER[activeIndex];
 
   return (
     <Background>
-      <SceneLabel eyebrow="Step 02" title="Adjacency list" />
+      <SceneLabel eyebrow="Representation 1" title="Adjacency list" />
       <AbsoluteFill
         style={{
           display: "flex",
@@ -96,7 +99,7 @@ export const AdjacencyListScene: React.FC = () => {
           </div>
           {NODE_ORDER.map((id, i) => {
             const rowIn = spring({
-              frame: frame - (20 + i * 18),
+              frame: frame - (16 + i * 14),
               fps,
               config: { damping: 200 },
             });

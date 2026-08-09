@@ -19,38 +19,57 @@ export const GraphBuildScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Cue 0–1 talk about nodes; cue 2+ talk about edges
-  const nodeCue = BUILD_TIMING.cues[0];
-  const edgeCue = BUILD_TIMING.cues[2];
-
-  const nodeStart = nodeCue.from + 30;
-  const nodeGap = Math.floor(nodeCue.durationInFrames / NODES.length);
-
-  const nodeProgress = NODES.map((_, i) =>
-    spring({
-      frame: frame - (nodeStart + i * nodeGap),
+  // cues 0..4 = nodes, 5..10 = edges, last = wrap-up
+  const nodeProgress = NODES.map((_, i) => {
+    const cue = BUILD_TIMING.cues[i];
+    return spring({
+      frame: frame - cue.from,
       fps,
-      config: { damping: 20, stiffness: 60 },
-    }),
-  );
+      config: { damping: 18, stiffness: 70 },
+    });
+  });
 
-  const edgeStart = edgeCue.from + 20;
-  const edgeGap = Math.floor(
-    (BUILD_TIMING.cues[2].durationInFrames +
-      BUILD_TIMING.cues[3].durationInFrames) /
-      EDGES.length,
-  );
-
-  const edgeProgress = EDGES.map((_, i) =>
-    interpolate(frame - (edgeStart + i * edgeGap), [0, 40], [0, 1], {
+  const edgeProgress = EDGES.map((_, i) => {
+    const cue = BUILD_TIMING.cues[NODES.length + i];
+    return interpolate(frame - cue.from, [0, 36], [0, 1], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
-    }),
-  );
+    });
+  });
+
+  const activeEdgeIndex =
+    frame >= BUILD_TIMING.cues[NODES.length].from &&
+    frame < BUILD_TIMING.cues[NODES.length + EDGES.length].from
+      ? Math.min(
+          EDGES.length - 1,
+          Math.max(
+            0,
+            BUILD_TIMING.cues
+              .slice(NODES.length, NODES.length + EDGES.length)
+              .reduce((idx, cue, i) => (frame >= cue.from ? i : idx), 0),
+          ),
+        )
+      : null;
+
+  const activeNodeIds =
+    frame < BUILD_TIMING.cues[NODES.length].from
+      ? [
+          NODES[
+            Math.min(
+              NODES.length - 1,
+              BUILD_TIMING.cues
+                .slice(0, NODES.length)
+                .reduce((idx, cue, i) => (frame >= cue.from ? i : idx), 0),
+            )
+          ].id,
+        ]
+      : activeEdgeIndex !== null
+        ? [EDGES[activeEdgeIndex].from, EDGES[activeEdgeIndex].to]
+        : [];
 
   return (
     <Background>
-      <SceneLabel eyebrow="Step 01" title="Build the graph" />
+      <SceneLabel eyebrow="Sample graph" title="Build the graph" />
       <AbsoluteFill
         style={{
           justifyContent: "center",
@@ -64,6 +83,8 @@ export const GraphBuildScene: React.FC = () => {
           edges={EDGES}
           nodeProgress={nodeProgress}
           edgeProgress={edgeProgress}
+          highlightNodeIds={activeNodeIds}
+          highlightEdgeIndex={activeEdgeIndex}
           width={1100}
           height={480}
           offsetX={100}
