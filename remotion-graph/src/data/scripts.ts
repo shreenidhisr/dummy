@@ -1,4 +1,4 @@
-import { ADJACENCY_LIST } from "./graph";
+import { ADJACENCY_LIST, EDGES, NODE_ORDER, NODES } from "./graph";
 import {
   SCENE_TAIL_FRAMES,
   buildTimedCues,
@@ -6,109 +6,120 @@ import {
 } from "./narration";
 
 export const TITLE_SCRIPTS: CueScript[] = [
+  { text: "A graph has vertices connected by edges." },
   {
-    text: "A graph stores relationships — vertices linked by edges.",
+    text: "There are two common ways to store a graph: adjacency list and adjacency matrix.",
   },
   {
-    text: "We will see the same graph as a picture, a list, and a matrix.",
-  },
-  {
-    text: "Watch slowly: each representation stores the same connections.",
+    text: "We will build one sample graph, then store it both ways.",
     extraFrames: 20,
   },
 ];
 
+/** One cue per on-screen action while building */
 export const BUILD_SCRIPTS: CueScript[] = [
+  ...NODES.map((node) => ({
+    text: `Add vertex ${node.id}.`,
+  })),
+  ...EDGES.map((edge) => ({
+    text: `Add undirected edge ${edge.from}–${edge.to}.`,
+  })),
   {
-    text: "Start with vertices: each circle is a node labeled A through E.",
+    text: "Graph is ready. Next: store it as an adjacency list.",
+    extraFrames: 25,
   },
+];
+
+export const LIST_SCRIPTS: CueScript[] = [
   {
-    text: "Nodes are the things we connect — cities, users, pages, and more.",
+    text: "Adjacency list: each vertex stores a list of its neighbors.",
   },
+  ...NODE_ORDER.map((id) => ({
+    text: `${id} → [${ADJACENCY_LIST[id].join(", ")}]`,
+    extraFrames: 15,
+  })),
   {
-    text: "Now draw edges: an edge means two nodes are related to each other.",
-  },
-  {
-    text: "This graph is undirected, so A connected to B is the same as B to A.",
-  },
-  {
-    text: "The picture is intuitive. Next we store these links in memory.",
+    text: "Space is about O(V + E). Good when the graph is sparse.",
     extraFrames: 20,
   },
 ];
 
-export const LIST_INTRO: CueScript = {
-  text: "Adjacency list: for each node, store only the nodes it touches.",
-};
-
-export const LIST_NODE_SCRIPTS: CueScript[] = [
+export const MATRIX_SCRIPTS: CueScript[] = [
   {
-    text: `Node A → [${ADJACENCY_LIST.A.join(", ")}]. The highlight shows those edges on the graph.`,
+    text: "Adjacency matrix: a V×V table. Entry [i][j] is 1 if an edge exists, else 0.",
   },
+  ...NODE_ORDER.map((id) => {
+    const cells = NODE_ORDER.map((col) =>
+      id === col ? "0" : ADJACENCY_LIST[id].includes(col) ? "1" : "0",
+    ).join("  ");
+    return {
+      text: `Row ${id}:  ${cells}`,
+      extraFrames: 20,
+    };
+  }),
   {
-    text: `Node B → [${ADJACENCY_LIST.B.join(", ")}]. Degree three means three neighbors are stored.`,
-  },
-  {
-    text: `Node C → [${ADJACENCY_LIST.C.join(", ")}]. Sparse graphs stay compact with this layout.`,
-  },
-  {
-    text: `Node D → [${ADJACENCY_LIST.D.join(", ")}]. Overall memory use is about O(V + E).`,
-  },
-  {
-    text: `Node E → [${ADJACENCY_LIST.E.join(", ")}]. Lists are the usual default for real graphs.`,
+    text: "Space is O(V²). Edge check is O(1). Good when the graph is dense.",
     extraFrames: 20,
   },
 ];
 
-export const MATRIX_INTRO: CueScript = {
-  text: "Adjacency matrix: a V by V grid. Cell i, j is 1 when an edge exists.",
-};
-
-export const MATRIX_ROW_SCRIPTS: CueScript[] = [
+export const COMPARE_SCRIPTS: CueScript[] = [
   {
-    text: `Row A: ones mark neighbors [${ADJACENCY_LIST.A.join(", ")}]. The diagonal stays 0 with no self-loops.`,
+    text: "Difference 1 — Space: list uses O(V + E); matrix uses O(V²).",
   },
   {
-    text: `Row B: edges to [${ADJACENCY_LIST.B.join(", ")}]. Reading one cell tests an edge in constant time.`,
+    text: "Difference 2 — Edge check: list may scan neighbors; matrix reads one cell in O(1).",
   },
   {
-    text: `Row C: neighbors [${ADJACENCY_LIST.C.join(", ")}]. Queries are fast, but we store every pair.`,
-  },
-  {
-    text: `Row D: neighbors [${ADJACENCY_LIST.D.join(", ")}]. Cost is O(V squared) space — many zeros if sparse.`,
-  },
-  {
-    text: `Row E: neighbors [${ADJACENCY_LIST.E.join(", ")}]. Prefer a matrix for dense graphs or frequent edge checks.`,
-    extraFrames: 30,
+    text: "Difference 3 — Best use: list for sparse graphs; matrix for dense graphs or many edge queries.",
+    extraFrames: 25,
   },
 ];
 
-export const SUMMARY_SCRIPTS: CueScript[] = [
+export const JAVA_LIST_SCRIPTS: CueScript[] = [
   {
-    text: "Remember: one graph, three ways to show the same edges.",
+    text: "Java adjacency list: Map from vertex to a list of neighbors.",
+    extraFrames: 20,
   },
   {
-    text: "Picture for intuition, list for sparse data, matrix for fast checks.",
-  },
-  {
-    text: "Choose the representation that matches your graph and your operations.",
+    text: "put('A', [B, D]), put('B', [A, C, E]), and so on for C, D, E.",
     extraFrames: 30,
+  },
+  {
+    text: "Adding an undirected edge means updating both neighbor lists.",
+    extraFrames: 25,
+  },
+];
+
+export const JAVA_MATRIX_SCRIPTS: CueScript[] = [
+  {
+    text: "Java adjacency matrix: an int[][] of size V×V, filled with 0/1.",
+    extraFrames: 20,
+  },
+  {
+    text: "For undirected edge u–v, set matrix[u][v] = 1 and matrix[v][u] = 1.",
+    extraFrames: 30,
+  },
+  {
+    text: "Query is simply matrix[u][v] == 1.",
+    extraFrames: 25,
   },
 ];
 
 export const TITLE_TIMING = buildTimedCues(TITLE_SCRIPTS);
 export const BUILD_TIMING = buildTimedCues(BUILD_SCRIPTS);
-export const LIST_TIMING = buildTimedCues([LIST_INTRO, ...LIST_NODE_SCRIPTS]);
-export const MATRIX_TIMING = buildTimedCues([
-  MATRIX_INTRO,
-  ...MATRIX_ROW_SCRIPTS,
-]);
-export const SUMMARY_TIMING = buildTimedCues(SUMMARY_SCRIPTS);
+export const LIST_TIMING = buildTimedCues(LIST_SCRIPTS);
+export const MATRIX_TIMING = buildTimedCues(MATRIX_SCRIPTS);
+export const COMPARE_TIMING = buildTimedCues(COMPARE_SCRIPTS);
+export const JAVA_LIST_TIMING = buildTimedCues(JAVA_LIST_SCRIPTS);
+export const JAVA_MATRIX_TIMING = buildTimedCues(JAVA_MATRIX_SCRIPTS);
 
 export const SCENE_FRAMES = {
   title: TITLE_TIMING.totalFrames + SCENE_TAIL_FRAMES,
   build: BUILD_TIMING.totalFrames + SCENE_TAIL_FRAMES,
   list: LIST_TIMING.totalFrames + SCENE_TAIL_FRAMES,
   matrix: MATRIX_TIMING.totalFrames + SCENE_TAIL_FRAMES,
-  summary: SUMMARY_TIMING.totalFrames + SCENE_TAIL_FRAMES,
+  compare: COMPARE_TIMING.totalFrames + SCENE_TAIL_FRAMES,
+  javaList: JAVA_LIST_TIMING.totalFrames + SCENE_TAIL_FRAMES,
+  javaMatrix: JAVA_MATRIX_TIMING.totalFrames + SCENE_TAIL_FRAMES,
 } as const;

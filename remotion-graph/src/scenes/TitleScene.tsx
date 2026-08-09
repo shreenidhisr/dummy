@@ -23,7 +23,11 @@ export const TitleScene: React.FC = () => {
     fps,
     config: { damping: 200 },
   });
-  const pulse = interpolate(Math.sin(frame / 36), [-1, 1], [0.88, 1]);
+  const cardsIn = spring({
+    frame: frame - TITLE_TIMING.cues[1].from,
+    fps,
+    config: { damping: 200 },
+  });
 
   return (
     <Background>
@@ -31,20 +35,9 @@ export const TitleScene: React.FC = () => {
         style={{
           justifyContent: "center",
           alignItems: "center",
-          paddingBottom: 110,
+          paddingBottom: 120,
         }}
       >
-        <div
-          style={{
-            width: 200,
-            height: 200,
-            borderRadius: "50%",
-            border: `2px solid ${COLORS.node}`,
-            opacity: 0.3 * pulse,
-            position: "absolute",
-            transform: `scale(${interpolate(titleIn, [0, 1], [0.7, 1.12])})`,
-          }}
-        />
         <div
           style={{
             textAlign: "center",
@@ -66,7 +59,7 @@ export const TitleScene: React.FC = () => {
           </div>
           <div
             style={{
-              fontSize: 78,
+              fontSize: 72,
               fontWeight: 700,
               letterSpacing: -2,
               lineHeight: 1,
@@ -76,15 +69,56 @@ export const TitleScene: React.FC = () => {
           </div>
           <div
             style={{
-              marginTop: 22,
+              marginTop: 20,
               fontSize: 24,
               color: COLORS.muted,
               opacity: subIn,
-              transform: `translateY(${interpolate(subIn, [0, 1], [14, 0])}px)`,
             }}
           >
-            From visual structure to adjacency list & matrix
+            Two ways to store the same graph
           </div>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: 28,
+            marginTop: 48,
+            opacity: cardsIn,
+            transform: `translateY(${interpolate(cardsIn, [0, 1], [20, 0])}px)`,
+          }}
+        >
+          {["Adjacency List", "Adjacency Matrix"].map((label, i) => (
+            <div
+              key={label}
+              style={{
+                minWidth: 260,
+                padding: "22px 28px",
+                borderRadius: 14,
+                background: COLORS.panel,
+                border: `1px solid ${COLORS.border}`,
+                textAlign: "center",
+              }}
+            >
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: "50%",
+                  margin: "0 auto 12px",
+                  background: i === 0 ? COLORS.node : COLORS.accent,
+                  color: COLORS.nodeText,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: 700,
+                }}
+              >
+                {i + 1}
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 700 }}>{label}</div>
+            </div>
+          ))}
         </div>
       </AbsoluteFill>
       <NarrationBar cues={TITLE_TIMING.cues} />

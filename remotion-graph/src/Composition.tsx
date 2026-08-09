@@ -6,7 +6,9 @@ import { TitleScene } from "./scenes/TitleScene";
 import { GraphBuildScene } from "./scenes/GraphBuildScene";
 import { AdjacencyListScene } from "./scenes/AdjacencyListScene";
 import { AdjacencyMatrixScene } from "./scenes/AdjacencyMatrixScene";
-import { SummaryScene } from "./scenes/SummaryScene";
+import { CompareScene } from "./scenes/CompareScene";
+import { JavaListScene } from "./scenes/JavaListScene";
+import { JavaMatrixScene } from "./scenes/JavaMatrixScene";
 
 export { FPS, HEIGHT, WIDTH };
 
@@ -17,7 +19,9 @@ export const TOTAL_FRAMES =
   SCENE_FRAMES.build +
   SCENE_FRAMES.list +
   SCENE_FRAMES.matrix +
-  SCENE_FRAMES.summary;
+  SCENE_FRAMES.compare +
+  SCENE_FRAMES.javaList +
+  SCENE_FRAMES.javaMatrix;
 
 export const GraphRepresentation: React.FC = () => {
   return (
@@ -35,8 +39,14 @@ export const GraphRepresentation: React.FC = () => {
         <Series.Sequence durationInFrames={SCENE_FRAMES.matrix}>
           <AdjacencyMatrixScene />
         </Series.Sequence>
-        <Series.Sequence durationInFrames={SCENE_FRAMES.summary}>
-          <SummaryScene />
+        <Series.Sequence durationInFrames={SCENE_FRAMES.compare}>
+          <CompareScene />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={SCENE_FRAMES.javaList}>
+          <JavaListScene />
+        </Series.Sequence>
+        <Series.Sequence durationInFrames={SCENE_FRAMES.javaMatrix}>
+          <JavaMatrixScene />
         </Series.Sequence>
       </Series>
     </AbsoluteFill>

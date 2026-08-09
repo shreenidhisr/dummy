@@ -1,12 +1,12 @@
 # Remotion — Graph Representation
 
-Animated walkthrough of graph data structure representations:
+Animated walkthrough of the **two** common graph representations:
 
-1. **Title** — Graph Representation intro  
-2. **Build the graph** — nodes and edges appear  
-3. **Adjacency list** — neighbors highlighted per vertex  
-4. **Adjacency matrix** — cells fill in with edge presence  
-5. **Summary** — same graph, three views  
+1. Sample graph build  
+2. Adjacency list  
+3. Adjacency matrix  
+4. Differences (list vs matrix)  
+5. Java code for both  
 
 ## Quick start
 
@@ -16,17 +16,10 @@ npm install
 npm run dev
 ```
 
-Open Remotion Studio and select the `GraphRepresentation` composition.
+Composition: `GraphRepresentation`
 
 ## Render
 
 ```bash
-npx remotion render GraphRepresentation out/graph-representation.mp4
+npm run render
 ```
-
-## Stack
-
-- Remotion 4
-- React 19
-- TypeScript
-- Tailwind v4 (available; scenes use inline styles for frame-accurate motion)

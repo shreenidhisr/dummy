@@ -24,18 +24,21 @@ export const AdjacencyMatrixScene: React.FC = () => {
   const nodeProgress = NODES.map(() => 1);
   const edgeProgress = EDGES.map(() => 1);
 
-  const reveal = interpolate(frame, [0, 50], [0, 1], {
+  const reveal = interpolate(frame, [0, 40], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  // cues[0] = intro; cues[1..] = one row each (A–E)
-  const rowCues = MATRIX_TIMING.cues.slice(1);
-  const scanStarted = frame >= rowCues[0].from;
+  // cue 0 = intro, cues 1..5 = rows, last = wrap
+  const rowCues = MATRIX_TIMING.cues.slice(1, 1 + NODE_ORDER.length);
+  const scanStarted =
+    frame >= rowCues[0].from &&
+    frame < MATRIX_TIMING.cues[MATRIX_TIMING.cues.length - 1].from;
+
   let scanRow = 0;
   for (let i = 0; i < rowCues.length; i++) {
     if (frame >= rowCues[i].from) {
-      scanRow = Math.min(i, NODE_ORDER.length - 1);
+      scanRow = i;
     }
   }
 
@@ -46,7 +49,7 @@ export const AdjacencyMatrixScene: React.FC = () => {
 
   return (
     <Background>
-      <SceneLabel eyebrow="Step 03" title="Adjacency matrix" />
+      <SceneLabel eyebrow="Representation 2" title="Adjacency matrix" />
       <AbsoluteFill
         style={{
           display: "flex",
@@ -93,7 +96,7 @@ export const AdjacencyMatrixScene: React.FC = () => {
               marginBottom: 14,
             }}
           >
-            matrix[i][j] = 1 if edge exists
+            matrix[i][j]
           </div>
           <div
             style={{
@@ -120,7 +123,7 @@ export const AdjacencyMatrixScene: React.FC = () => {
             ))}
             {NODE_ORDER.map((row, ri) => {
               const rowSpring = spring({
-                frame: frame - (24 + ri * 14),
+                frame: frame - (20 + ri * 12),
                 fps,
                 config: { damping: 200 },
               });
@@ -138,7 +141,7 @@ export const AdjacencyMatrixScene: React.FC = () => {
                   </div>
                   {NODE_ORDER.map((col, ci) => {
                     const on = isConnected(row, col);
-                    const cellDelay = 36 + ri * 12 + ci * 8;
+                    const cellDelay = 30 + ri * 10 + ci * 6;
                     const cellIn = spring({
                       frame: frame - cellDelay,
                       fps,
